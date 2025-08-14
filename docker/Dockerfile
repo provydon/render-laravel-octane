@@ -57,7 +57,17 @@ RUN composer install --no-dev --no-interaction --optimize-autoloader --no-script
 
 RUN rm -rf /app/bootstrap/cache/* && \
     rm -rf /app/storage/framework/cache/* && \
-    rm -rf /app/storage/framework/config/*
+    rm -rf /app/storage/framework/config/* && \
+    rm -rf /app/storage/framework/views/* && \
+    rm -rf /app/storage/framework/sessions/* && \
+    rm -rf /app/storage/framework/testing/* && \
+    rm -rf /app/storage/framework/views/* && \
+    rm -rf /app/storage/framework/views/* && \
+    php artisan optimize && \
+    php artisan storage:link && \
+    echo "yes" | php artisan octane:install --server=frankenphp
+
+RUN chmod +x /usr/local/bin/frankenphp
 
 EXPOSE 80
 EXPOSE 443
