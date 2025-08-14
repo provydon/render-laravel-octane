@@ -8,7 +8,7 @@
 |-------|-------|----------|
 | **FrankenPHP Permissions** | `Operation not permitted` | Non-root user + port 8000 |
 | **Port Binding** | `Bind for 0.0.0.0:80 failed` | Use non-privileged port 8000 |
-| **Service Providers** | `PailServiceProvider not found` | Remove problematic packages |
+| **Cache Issues** | Service provider conflicts | Clear cache before app loads |
 
 ## 🔧 Quick Fixes
 
@@ -26,18 +26,7 @@ ENV SERVER_NAME=:8000
 USER ${USER}
 ```
 
-### 2. Composer Changes
-```json
-{
-    "extra": {
-        "laravel": {
-            "dont-discover": ["laravel/pail"]
-        }
-    }
-}
-```
-
-### 3. Port Configuration
+### 2. Port Configuration
 - **Container**: `8000` (non-privileged)
 - **Local**: `3000` → `8000`
 - **Render**: Auto-detects `8000`
@@ -77,7 +66,7 @@ git push
 |---------|----------|
 | FrankenPHP won't start | Use port 8000, not 80 |
 | Port conflicts | Change local port in docker-compose.yml |
-| Service provider errors | Add packages to `dont-discover` |
+| Cache issues | Clear bootstrap and storage cache |
 
 ## 📁 Key Files
 
