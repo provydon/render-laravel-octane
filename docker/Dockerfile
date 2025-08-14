@@ -1,0 +1,70 @@
+FROM dunglas/frankenphp
+
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+RUN chmod +x /usr/local/bin/install-php-extensions
+
+RUN install-php-extensions \
+    bcmath \
+    gd \
+    gnupg \
+    intl \
+    opcache \
+    pcntl \
+    pdo_sqlite \
+    redis \
+    zip
+
+RUN apt-get update && apt-get install -y \
+    bash \
+    supervisor \
+    git \
+    curl \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+
+RUN mkdir -p /var/log/supervisor /app/storage/logs /app/config /app/data
+
+ENV XDG_CONFIG_HOME=/app/config
+ENV XDG_DATA_HOME=/app/data
+ENV SERVER_NAME=:80
+ENV OCTANE_SERVER=frankenphp
+
+WORKDIR /app
+COPY . /app
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker/php.ini /usr/local/etc/php/php.ini
+COPY docker/docker-entrypoint.sh /docker-entrypoint.sh
+
+RUN chmod -R 777 /app/storage /app/bootstrap/cache && \
+    chmod -R 777 /app/public && \
+    chown -R root:root /app/public && \
+    chmod +x /app/artisan
+
+RUN echo "APP_NAME=Laravel" > .env && \
+    echo "APP_ENV=production" >> .env && \
+    echo "APP_KEY=base64:$(openssl rand -base64 32)" >> .env && \
+    echo "APP_DEBUG=false" >> .env && \
+    echo "APP_URL=http://localhost" >> .env && \
+    echo "DB_CONNECTION=sqlite" >> .env && \
+    echo "DB_DATABASE=/app/database/database.sqlite" >> .env && \
+    echo "CACHE_DRIVER=file" >> .env && \
+    echo "SESSION_DRIVER=file" >> .env && \
+    echo "QUEUE_CONNECTION=sync" >> .env
+
+RUN composer install --no-dev --no-interaction --optimize-autoloader --no-scripts
+
+RUN rm -rf /app/bootstrap/cache/* && \
+    rm -rf /app/storage/framework/cache/* && \
+    rm -rf /app/storage/framework/config/*
+
+EXPOSE 80
+EXPOSE 443
+EXPOSE 2019
+
+HEALTHCHECK --interval=10s --timeout=5s CMD curl -f http://localhost:80/ || exit 1
+
+RUN chmod +x /docker-entrypoint.sh
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
