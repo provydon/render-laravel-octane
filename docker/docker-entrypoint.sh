@@ -5,21 +5,27 @@ echo "1"
 ls -la
 
 # Refresh env from .env.example using current environment values
+#!/bin/sh
+set -e
 while IFS= read -r line; do
   var=$(echo "$line" | cut -d= -f1)
-
-  # Skip empty or commented lines
   [ -z "$var" ] && continue
   case "$var" in
     \#*|"RENDER_"*|"KUBERNETES_"*|"HOSTNAME"|"PATH") continue ;;
   esac
 
-  # Get value from environment (POSIX-safe)
-  val=$(eval "echo \${$var}")
+  current_val=$(eval "echo \${$var}")
 
-  # Only write if value is non-empty
-  if [ -n "$val" ]; then
-    printf '%s=%s\n' "$var" "$val"
+  if [ -n "$current_val" ]; then
+    printf '%s=%s\n' "$var" "$current_val"
+  else
+    default_val=$(echo "$line" | cut -d= -f2-)
+    case "$default_val" in
+      *'$('*')'*) # if default contains a command
+        eval "default_val=$default_val"
+        ;;
+    esac
+    printf '%s=%s\n' "$var" "$default_val"
   fi
 done < .env.example > .env
 
