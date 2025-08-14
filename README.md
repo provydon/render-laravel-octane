@@ -87,3 +87,13 @@ composer.json             # Dependencies
 ---
 
 **Deploy with confidence** - This setup has been tested and proven to work on Render! 🚀
+
+---
+
+## ☕ Support This Project
+
+**Made with ❤️ by Providence Ifeosame**
+
+If this project helped you finally get Laravel Octane working on Render after months of struggle, consider buying me a coffee!
+
+[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/provydon)
