@@ -7,6 +7,13 @@ ls -la
 #cat .env
 
 ## Refresh env
+while read line; do
+  var=$(echo "$line" | cut -d= -f1)
+  if [ -n "${!var}" ]; then
+    echo "$var=${!var}"
+  fi
+done < .env.example > .env
+
 php artisan config:clear
 php artisan config:cache
 
