@@ -1,5 +1,13 @@
 FROM dunglas/frankenphp
 
+ARG USER=appuser
+
+RUN \
+    useradd ${USER} && \
+    setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp && \
+    chown -R ${USER}:${USER} /data/caddy && \
+    chown -R ${USER}:${USER} /config/caddy
+
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 RUN chmod +x /usr/local/bin/install-php-extensions
 
@@ -28,7 +36,7 @@ RUN mkdir -p /var/log/supervisor /app/storage/logs /app/config /app/data
 
 ENV XDG_CONFIG_HOME=/app/config
 ENV XDG_DATA_HOME=/app/data
-ENV SERVER_NAME=:80
+ENV SERVER_NAME=:8000
 ENV OCTANE_SERVER=frankenphp
 
 WORKDIR /app
@@ -39,7 +47,8 @@ COPY docker/docker-entrypoint.sh /docker-entrypoint.sh
 
 RUN chmod -R 777 /app/storage /app/bootstrap/cache && \
     chmod -R 777 /app/public && \
-    chown -R root:root /app/public && \
+    chown -R ${USER}:${USER} /app && \
+    chown -R ${USER}:${USER} /var/log/supervisor && \
     chmod +x /app/artisan
 
 RUN echo "APP_NAME=Laravel" > .env && \
@@ -69,12 +78,13 @@ RUN rm -rf /app/bootstrap/cache/* && \
 
 RUN chmod +x /usr/local/bin/frankenphp
 
-EXPOSE 80
+EXPOSE 8000
 EXPOSE 443
 EXPOSE 2019
 
-HEALTHCHECK --interval=10s --timeout=5s CMD curl -f http://localhost:80/ || exit 1
+HEALTHCHECK --interval=10s --timeout=5s CMD curl -f http://localhost:8000/ || exit 1
 
 RUN chmod +x /docker-entrypoint.sh
+USER ${USER}
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
