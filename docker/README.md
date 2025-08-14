@@ -9,6 +9,6 @@ Files:
 
 ```bash
 # From project root
-docker build -t binkey-admin -f docker/Dockerfile .
-docker run -p 8000:8000 binkey-admin
+docker build -t render-laravel-frankenphp -f docker/Dockerfile .
+docker run -p 8000:8000 render-laravel-frankenphp
 ``` 
