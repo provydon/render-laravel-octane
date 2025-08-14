@@ -4,7 +4,7 @@ ARG USER=appuser
 
 RUN \
     useradd ${USER} && \
-    setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp && \
+    setcap -r /usr/local/bin/frankenphp && \
     chown -R ${USER}:${USER} /data/caddy && \
     chown -R ${USER}:${USER} /config/caddy
 
@@ -49,6 +49,7 @@ RUN chmod -R 777 /app/storage /app/bootstrap/cache && \
     chmod -R 777 /app/public && \
     chown -R ${USER}:${USER} /app && \
     chown -R ${USER}:${USER} /var/log/supervisor && \
+    chown -R ${USER}:${USER} /var/run && \
     chmod +x /app/artisan
 
 RUN echo "APP_NAME=Laravel" > .env && \
