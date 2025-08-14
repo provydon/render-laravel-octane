@@ -52,17 +52,6 @@ RUN chmod -R 777 /app/storage /app/bootstrap/cache && \
     chown -R ${USER}:${USER} /var/run && \
     chmod +x /app/artisan
 
-RUN echo "APP_NAME=Laravel" > .env && \
-    echo "APP_ENV=production" >> .env && \
-    echo "APP_KEY=base64:$(openssl rand -base64 32)" >> .env && \
-    echo "APP_DEBUG=false" >> .env && \
-    echo "APP_URL=http://localhost" >> .env && \
-    echo "DB_CONNECTION=sqlite" >> .env && \
-    echo "DB_DATABASE=/app/database/database.sqlite" >> .env && \
-    echo "CACHE_DRIVER=file" >> .env && \
-    echo "SESSION_DRIVER=file" >> .env && \
-    echo "QUEUE_CONNECTION=sync" >> .env
-
 RUN composer install --no-dev --no-interaction --optimize-autoloader --no-scripts
 
 RUN rm -rf /app/bootstrap/cache/* && \
