@@ -17,11 +17,21 @@ while IFS= read -r line; do
     RENDER_*|KUBERNETES_*|HOSTNAME|PATH) continue ;;
   esac
 
+  # If APP_KEY is in .env.example, skip it and let Laravel generate it
+  if [ "$var" = "APP_KEY" ]; then
+    continue
+  fi
+
   val=$(eval "echo \${$var}")
   [ -n "$val" ] || val=$def
 
   printf '%s=%s\n' "$var" "$val"
 done < .env.example > .env
+
+# Generate APP_KEY if missing
+if ! grep -q '^APP_KEY=' .env || grep -q '^APP_KEY=$' .env; then
+    php artisan key:generate --force
+fi
 
 php artisan config:clear
 php artisan config:cache
