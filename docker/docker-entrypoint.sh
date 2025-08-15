@@ -28,11 +28,6 @@ while IFS= read -r line; do
   printf '%s=%s\n' "$var" "$val"
 done < .env.example > .env
 
-# Generate APP_KEY if missing
-if ! grep -q '^APP_KEY=' .env || grep -q '^APP_KEY=$' .env; then
-    php artisan key:generate --force
-fi
-
 php artisan config:clear
 php artisan config:cache
 php artisan migrate --force
